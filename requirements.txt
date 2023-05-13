@@ -1,3 +1,3 @@
 pyserial
 tk
-pillow
+Pillow
