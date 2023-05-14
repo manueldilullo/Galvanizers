@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+from tkinter import *
 import sqlite3
 import smtplib
 import random
@@ -13,6 +14,7 @@ TOPIC = ""
 class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        self.titlevar=" "
         self.title("Galvanic Skin Response Tracker")
 
         self.email = ""
@@ -24,13 +26,20 @@ class App(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (SignupPage, LoginPage, ChooseTopicPage, SlideshowPage, DonePage):
+        for F in (SignupPage, LoginPage, SlideshowPage, DonePage):
             page_name = F.__name__
             frame = F(master=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
+        page_name = ChooseTopicPage.__name__
+        slideShowpage_name = SlideshowPage.__name__
+        frame = ChooseTopicPage(master=container, controller=self, slideShowPage=self.frames[slideShowpage_name])
+        self.frames[page_name] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+
         self.switch_frame(SignupPage)
+        self.title("Signup")
 
     def switch_frame(self, page_class):
         frame = self.frames[page_class.__name__]
@@ -42,7 +51,6 @@ class SignupPage(tk.Frame):
         self.master = master
         
         self.controller = controller
-        self.controller.title("Signup")
 
         self.name_label = tk.Label(self, text="Name:")
         self.name_label.grid(row=0, column=0)
@@ -104,6 +112,7 @@ class SignupPage(tk.Frame):
         # conn.commit()
         # conn.close()
         self.controller.switch_frame(LoginPage)
+        self.controller.title("Login")
 
 class LoginPage(tk.Frame):
     def __init__(self, master, controller):
@@ -111,7 +120,6 @@ class LoginPage(tk.Frame):
         self.master = master
 
         self.controller = controller
-        self.controller.title("Login")
 
         self.email_label = tk.Label(self, text="Email:")
         self.email_label.grid(row=0, column=0)
@@ -129,6 +137,7 @@ class LoginPage(tk.Frame):
     def login(self):
         # TODO IMPLEMENT AND FIX THIS
         self.controller.switch_frame(ChooseTopicPage)
+        self.controller.title("Choose Topic")
         # email = self.email_entry.get()
         # password = self.password_entry.get()
         # conn = sqlite3.connect('user.db')
@@ -145,12 +154,13 @@ class LoginPage(tk.Frame):
         #     self.password_entry.config(bg="red")
         
 class ChooseTopicPage(tk.Frame):
-    def __init__(self, master, controller):
+    def __init__(self, master, controller, slideShowPage=None):
+        
+        self.slideShowPage = slideShowPage
         tk.Frame.__init__(self, master)
         self.master = master
         
         self.controller = controller
-        self.controller.title("Choose Topic")
         
         self.topic_label = tk.Label(self, text="Choose a topic:")
         self.topic_label.grid(row=0, column=0)
@@ -166,36 +176,39 @@ class ChooseTopicPage(tk.Frame):
 
     def done(self):
         self.master.topic = self.topic_var.get()
+        
+        if self.slideShowPage is not None:
+    
+            self.slideShowPage.topic = self.master.topic
+        else:
+            self.slideShowPage.topic = "topic1"
+        
+
+        self.slideShowPage.controller.title("Slideshow " + self.slideShowPage.topic)
+        self.slideShowPage.images_folder = os.path.join(CWD, "images", self.master.topic)
+        self.slideShowPage.images = list(map(lambda x: os.path.join(self.slideShowPage.images_folder, x), ["image1.jpg", "image2.jpg", "image3.jpg"]))
+        self.slideShowPage.image_index = 0
+        self.slideShowPage.image_label = tk.Label(self.slideShowPage)
+        self.slideShowPage.image_label.grid(row=0, column=0)
+
+        self.slideShowPage.show_image()
+
         self.controller.switch_frame(SlideshowPage)
         
 class SlideshowPage(tk.Frame):
     def __init__(self, master, controller):
+        
         tk.Frame.__init__(self, master)
         self.master = master
-        
-        # TODO - Find a way to pass topic from previous frame
-        try:
-            self.topic = master.topic.lower()
-        except e:
-            self.topic = "topic1"
-        
         self.controller = controller
-        self.controller.title(f"Slideshow - {self.topic}")
-        
-        
-        self.images_folder = os.path.join(CWD, "images", self.topic)
-        self.images = list(map(lambda x: os.path.join(self.images_folder, x), ["image1.jpg", "image2.jpg", "image3.jpg"]))
-        self.image_index = 0
-        self.image_label = tk.Label(self)
-        self.image_label.grid(row=0, column=0)
 
-        self.show_image()
 
     def show_image(self):
-        # TODO FIX THIS
+        
         if self.image_index < len(self.images):
-            self.img = Image.open(self.images[self.image_index])
-            self.image_label.config(image=ImageTk.PhotoImage(self.img))
+            print(self.images[self.image_index])
+            self.img = ImageTk.PhotoImage(Image.open(self.images[self.image_index]))
+            self.image_label.config(image=self.img)
             self.image_index += 1
             self.image_label.after(6000, self.show_image)
         else:
@@ -204,6 +217,7 @@ class SlideshowPage(tk.Frame):
 
     def done(self):
         self.controller.switch_frame(DonePage)
+        self.controller.title("Random Number")
         
 class DonePage(tk.Frame):
     def __init__(self, master, controller):
@@ -211,7 +225,6 @@ class DonePage(tk.Frame):
         self.master = master
         
         self.controller = controller
-        self.controller.title("Random Number")
         
         self.random_number = random.randint(0, 100)
         
