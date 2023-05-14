@@ -204,7 +204,7 @@ class SlideshowPage(tk.Frame):
 
 
     def show_image(self):
-        # TODO FIX THIS
+        
         if self.image_index < len(self.images):
             print(self.images[self.image_index])
             self.img = ImageTk.PhotoImage(Image.open(self.images[self.image_index]))
