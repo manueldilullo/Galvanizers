@@ -9,7 +9,10 @@ from email.mime.text import MIMEText
 from PIL import Image, ImageTk
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-TOPIC = ""
+
+WINDOW_SIZES = [500, 500]
+RESIZABLE_SIZES = (0, 0)
+IMAGES_SIZES = (250, 250)
 
 class App(tk.Tk):
     def __init__(self):
@@ -20,6 +23,9 @@ class App(tk.Tk):
         self.email = ""
         self.password = ""
 
+        self.geometry(f"{WINDOW_SIZES[0]}x{WINDOW_SIZES[1]}")
+        self.resizable = RESIZABLE_SIZES
+        
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -155,12 +161,11 @@ class LoginPage(tk.Frame):
         
 class ChooseTopicPage(tk.Frame):
     def __init__(self, master, controller, slideShowPage=None):
-        
-        self.slideShowPage = slideShowPage
         tk.Frame.__init__(self, master)
-        self.master = master
         
+        self.master = master
         self.controller = controller
+        self.slideShowPage = slideShowPage
         
         self.topic_label = tk.Label(self, text="Choose a topic:")
         self.topic_label.grid(row=0, column=0)
@@ -176,20 +181,14 @@ class ChooseTopicPage(tk.Frame):
 
     def done(self):
         self.master.topic = self.topic_var.get()
-        
-        if self.slideShowPage is not None:
-    
-            self.slideShowPage.topic = self.master.topic
-        else:
-            self.slideShowPage.topic = "topic1"
-        
-
+        self.slideShowPage.topic = self.master.topic
         self.slideShowPage.controller.title("Slideshow " + self.slideShowPage.topic)
+
         self.slideShowPage.images_folder = os.path.join(CWD, "images", self.master.topic)
         self.slideShowPage.images = list(map(lambda x: os.path.join(self.slideShowPage.images_folder, x), ["image1.jpg", "image2.jpg", "image3.jpg"]))
         self.slideShowPage.image_index = 0
         self.slideShowPage.image_label = tk.Label(self.slideShowPage)
-        self.slideShowPage.image_label.grid(row=0, column=0)
+        self.slideShowPage.image_label.place(relx=.5, rely=.35, anchor="c")
 
         self.slideShowPage.show_image()
 
@@ -197,23 +196,25 @@ class ChooseTopicPage(tk.Frame):
         
 class SlideshowPage(tk.Frame):
     def __init__(self, master, controller):
-        
         tk.Frame.__init__(self, master)
         self.master = master
         self.controller = controller
 
-
     def show_image(self):
-        
         if self.image_index < len(self.images):
             print(self.images[self.image_index])
-            self.img = ImageTk.PhotoImage(Image.open(self.images[self.image_index]))
+            
+            image_bin = Image.open(self.images[self.image_index])
+            image_bin = image_bin.resize(IMAGES_SIZES, Image.ANTIALIAS)
+            
+            self.img = ImageTk.PhotoImage(image_bin)
+            
             self.image_label.config(image=self.img)
             self.image_index += 1
             self.image_label.after(6000, self.show_image)
         else:
             self.done_button = tk.Button(self, text="Done", command=self.done)
-            self.done_button.grid(row=1, column=0)
+            self.done_button.place(relx=.5, rely=.65, anchor="c")
 
     def done(self):
         self.controller.switch_frame(DonePage)
