@@ -1,4 +1,5 @@
 import os
+import argparse
 import tkinter as tk
 from tkinter import *
 import sqlite3
@@ -24,6 +25,7 @@ from matplotlib import style
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 TOPIC = ""
+isTest = False
 
 class App(tk.Tk):
     def __init__(self):
@@ -236,7 +238,6 @@ class SlideshowPage(tk.Frame):
 
         self.ani = animation.FuncAnimation(self.f, self.animate, interval=100)
 
-
     def animate(self, i):
         self.pullData = open('test_data.csv', 'r').read()
         self.dataArray = self.pullData.split('\n')
@@ -255,8 +256,10 @@ class SlideshowPage(tk.Frame):
 
     def measure_thread(self):
         self.start_button.grid_remove()
-        self.ser = serial.Serial('/dev/cu.usbserial-65D2AB33BE')
-        self.ser.flushInput()
+        
+        if not isTest:
+            self.ser = serial.Serial('/dev/cu.usbserial-65D2AB33BE')
+            self.ser.flushInput()
 
         self.streamed_data = []
         self.averages = []
@@ -325,9 +328,13 @@ class SlideshowPage(tk.Frame):
         self.i = 0
 
         while True:
-            ser_read = self.ser.readline()
-            ser_read_float = float(ser_read[0:len(ser_read)-2].decode("utf-8"))
-            print(ser_read_float)
+            if not isTest:
+                ser_read = self.ser.readline()
+                ser_read_float = float(ser_read[0:len(ser_read)-2].decode("utf-8"))
+                print(ser_read_float)
+            else:
+                ser_read_float = random.uniform(1,100)
+    
             self.streamed_data.append(ser_read_float)
 
             with open("test_data.csv","a+") as f:
@@ -387,5 +394,10 @@ class DonePage(tk.Frame):
         self.controller.title("Choose Topic")
         
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Galvanic Skin Sensor tracker")
+    parser.add_argument('--test', '-t', default='n', help='Set it as y or Y if you want to run the program in test environment. Default: n')
+    args = parser.parse_args()
+    isTest = args.test.lower() == "y"
+
     app = App()
     app.mainloop()
