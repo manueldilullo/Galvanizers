@@ -10,7 +10,7 @@ Installation
 
 # Usage
 
-1. Launch the program by running python main.py.
+1. Launch the program by running python main.py. [to run it in a test environment (without serial readings) add the `--test y` argument]
 2. Signup and then login 
 3. The GUI will display a series of images to the user.
 4. The galvanic skin sensor will measure the user's physiological response to each image and record the data in a SQLite DB.

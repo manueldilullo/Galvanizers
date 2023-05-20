@@ -1,4 +1,5 @@
 import os
+import argparse
 import tkinter as tk
 from tkinter import *
 import sqlite3
@@ -6,10 +7,25 @@ import smtplib
 import random
 import string
 from email.mime.text import MIMEText
+from numpy import mean
 from PIL import Image, ImageTk
+from threading import *
+import serial
+import time
+
+import csv
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
+from matplotlib import style
+
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 TOPIC = ""
+isTest = False
 
 class App(tk.Tk):
     def __init__(self):
@@ -26,11 +42,17 @@ class App(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (SignupPage, LoginPage, SlideshowPage, DonePage):
+        for F in (SignupPage, LoginPage, DonePage):
             page_name = F.__name__
             frame = F(master=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
+
+        page_name = SlideshowPage.__name__
+        donePage_name = DonePage.__name__
+        frame = SlideshowPage(master=container, controller=self, donePage=self.frames[donePage_name])
+        self.frames[page_name] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
 
         page_name = ChooseTopicPage.__name__
         slideShowpage_name = SlideshowPage.__name__
@@ -190,34 +212,147 @@ class ChooseTopicPage(tk.Frame):
         self.slideShowPage.image_index = 0
         self.slideShowPage.image_label = tk.Label(self.slideShowPage)
         self.slideShowPage.image_label.grid(row=0, column=0)
+        
+        self.slideShowPage.start_button.grid(row=0,column=1)
 
-        self.slideShowPage.show_image()
 
         self.controller.switch_frame(SlideshowPage)
         
 class SlideshowPage(tk.Frame):
-    def __init__(self, master, controller):
+    def __init__(self, master, controller, donePage=None):
         
+        self.donePage = donePage
+
         tk.Frame.__init__(self, master)
         self.master = master
         self.controller = controller
+        self.start_button = tk.Button(self, text="Start", command=self.measure_thread)
+        self.start_button.grid(row=0,column=1)
+
+        self.f = Figure(figsize=(5,4), dpi=100,)
+        self.a = self.f.add_subplot(111)
+
+        self.a.xaxis.set_visible(False)
+
+        self.canvas = FigureCanvasTkAgg(self.f, self.master)
+
+        self.ani = animation.FuncAnimation(self.f, self.animate, interval=100)
+
+    def animate(self, i):
+        self.pullData = open('test_data.csv', 'r').read()
+        self.dataArray = self.pullData.split('\n')
+        self.xar=[]
+        self.yar=[]
+        for eachLine in self.dataArray:
+            if len(eachLine)>1:
+                x,y = eachLine.split(',')
+                self.xar.append(float(x))
+                self.yar.append(float(y))
+        self.a.clear()
+        self.a.set_title("gsr over time")
+        self.a.plot(self.xar,self.yar)
+         
 
 
-    def show_image(self):
+    def measure_thread(self):
+        self.start_button.grid_remove()
         
+        if not isTest:
+            self.ser = serial.Serial('/dev/cu.usbserial-65D2AB33BE')
+            self.ser.flushInput()
+
+        self.streamed_data = []
+        self.averages = []
+
+        self.stop_threads=False
+        self.t1=Thread(target=self.measure)
+
+        self.t1.start()
+        self.show_image()
+
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(column=1, row=0)
+
+
+    
+    def show_image(self):
+
         if self.image_index < len(self.images):
-            print(self.images[self.image_index])
+            
             self.img = ImageTk.PhotoImage(Image.open(self.images[self.image_index]))
             self.image_label.config(image=self.img)
             self.image_index += 1
             self.image_label.after(6000, self.show_image)
+    
         else:
+            
+            self.stop_threads = True
+            self.t1.join()
+
+            self.image_index = 0
+
+            self.averages.append(mean(self.streamed_data[0:60]))
+            self.averages.append(mean(self.streamed_data[60:120]))
+            self.averages.append(mean(self.streamed_data[120:180]))
+
+            self.donePage.text = "The image you have reacted the most to is the #" + str(self.averages.index(max(self.averages))+1) 
+            self.donePage.text += " with average gsr value equal to "
+            self.donePage.text += str(max(self.averages))
+
+            self.donePage.max_val.config(text = self.donePage.text)
+
+            self.donePage.img_path = "/image" + str(self.averages.index(max(self.averages))+1)
+            self.donePage.img_path += ".jpg"
+
+            self.donePage.img_path = self.images_folder + self.donePage.img_path
+
+            self.donePage.im = Image.open(self.donePage.img_path)
+            self.donePage.im.thumbnail((180, 180), Image.Resampling.LANCZOS)
+
+            self.donePage.img = ImageTk.PhotoImage(self.donePage.im)
+
+            self.donePage.image_label.config(image=self.donePage.img)
+            
+
+            self.image_label.grid_forget()
             self.done_button = tk.Button(self, text="Done", command=self.done)
             self.done_button.grid(row=1, column=0)
 
+            
+
+    
+    def measure(self):
+
+        open("test_data.csv","w")
+
+        self.i = 0
+
+        while True:
+            if not isTest:
+                ser_read = self.ser.readline()
+                ser_read_float = float(ser_read[0:len(ser_read)-2].decode("utf-8"))
+                print(ser_read_float)
+            else:
+                ser_read_float = random.uniform(1,100)
+    
+            self.streamed_data.append(ser_read_float)
+
+            with open("test_data.csv","a+") as f:
+                writer = csv.writer(f,delimiter=",")
+                writer.writerow([self.i,ser_read_float])
+            
+            self.i +=1
+
+            if self.stop_threads:
+                break
+
+
     def done(self):
+        self.canvas.get_tk_widget().grid_remove()
         self.controller.switch_frame(DonePage)
-        self.controller.title("Random Number")
+        self.controller.title("Results")
+        self.done_button.grid_remove()
+        self.start_button.grid(row=0,column=1)
         
 class DonePage(tk.Frame):
     def __init__(self, master, controller):
@@ -228,13 +363,16 @@ class DonePage(tk.Frame):
         
         self.random_number = random.randint(0, 100)
         
-        self.random_label = tk.Label(self, text=f"Random Number: {self.random_number}")
-        self.random_label.pack(pady=50)
+        self.max_val = tk.Label(self, text=f"Random Number: {self.random_number}")
+        self.max_val.pack(pady=50)
+
+        self.image_label = Label(self)
+        self.image_label.pack(pady=45)
 
         self.email_button = tk.Button(self, text="Send me an email", command=self.send_email)
         self.email_button.pack(pady=10)
         
-        self.done_button = tk.Button(self, text="Done", font=("Helvetica", 14), command=lambda: controller.switch_frame(ChooseTopicPage))
+        self.done_button = tk.Button(self, text="Done", command=self.done)
         self.done_button.pack(pady=10)
         
     def send_email(self):
@@ -248,7 +386,18 @@ class DonePage(tk.Frame):
         #     server.sendmail(email, email, message)
         # messagebox.showinfo("Email sent", "The email has been sent to your address.")
         self.controller.switch_frame(ChooseTopicPage)
+
+    def done(self):
+        self.controller.switch_frame(ChooseTopicPage)
+        self.done_button.grid_remove()
+
+        self.controller.title("Choose Topic")
         
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Galvanic Skin Sensor tracker")
+    parser.add_argument('--test', '-t', default='n', help='Set it as y or Y if you want to run the program in test environment. Default: n')
+    args = parser.parse_args()
+    isTest = args.test.lower() == "y"
+
     app = App()
     app.mainloop()
