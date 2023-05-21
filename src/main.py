@@ -12,6 +12,7 @@ from PIL import Image, ImageTk
 from threading import *
 import serial
 import time
+import tkinter.messagebox as messagebox
 
 import csv
 import matplotlib
@@ -66,6 +67,8 @@ class App(tk.Tk):
     def switch_frame(self, page_class):
         frame = self.frames[page_class.__name__]
         frame.tkraise()
+
+ 
         
 class SignupPage(tk.Frame):
     def __init__(self, master, controller):
@@ -93,6 +96,7 @@ class SignupPage(tk.Frame):
         self.password_label.grid(row=3, column=0)
         self.password_entry = tk.Entry(self, show="*")
         self.password_entry.grid(row=3, column=1)
+                
 
         self.age_label = tk.Label(self, text="Age:")
         self.age_label.grid(row=4, column=0)
@@ -101,40 +105,93 @@ class SignupPage(tk.Frame):
 
         self.sex_label = tk.Label(self, text="Sex:")
         self.sex_label.grid(row=5, column=0)
-        self.sex_male = tk.Checkbutton(self, text="Male")
+
+        self.sex_var = tk.StringVar()
+        self.sex_var.set("Male")  # Set initial value
+
+        self.sex_male = tk.Radiobutton(self, text="Male", variable=self.sex_var, value="Male")
         self.sex_male.grid(row=5, column=1)
-        self.sex_female = tk.Checkbutton(self, text="Female")
+
+        self.sex_female = tk.Radiobutton(self, text="Female", variable=self.sex_var, value="Female")
         self.sex_female.grid(row=5, column=2)
+
+        self.sex_other = tk.Radiobutton(self, text="Other", variable=self.sex_var, value="Other")
+        self.sex_other.grid(row=5, column=3)
 
         self.feeling_label = tk.Label(self, text="How are you feeling?")
         self.feeling_label.grid(row=6, column=0)
-        self.feeling_happy = tk.Checkbutton(self, text="Happy😁")
+        self.feeling_var = tk.StringVar()
+        self.feeling_var.set("Happy")  # Set initial value
+
+        self.feeling_happy = tk.Radiobutton(self, text="Happy😁", variable=self.feeling_var, value="Happy")
         self.feeling_happy.grid(row=6, column=1)
-        self.feeling_sad = tk.Checkbutton(self, text="Sad😔")
+
+        self.feeling_sad = tk.Radiobutton(self, text="Sad😔", variable=self.feeling_var, value="Sad")
         self.feeling_sad.grid(row=6, column=2)
 
         self.submit_button = tk.Button(self, text="Submit", command=self.submit)
         self.submit_button.grid(row=7, column=1)
 
     def submit(self):
-        # TODO FIX THIS
-        # name = self.name_entry.get()
-        # surname = self.surname_entry.get()
-        # email = self.email_entry.get()
-        # password = self.password_entry.get()
-        # age = self.age_entry.get()
-        # sex = "Male" if self.sex_male.getvar("value") == 1 else "Female"
-        # feeling = "Happy" if self.feeling_happy.getvar("value") == 1 else "Sad"
-        
-        # conn = sqlite3.connect('user.db')
-        # c = conn.cursor()
-        # c.execute('''CREATE TABLE IF NOT EXISTS users
-        #              (name text, surname text, email text, password text, age integer, sex text, feeling text)''')
-        # c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (name, surname, email, password, age, sex, feeling))
-        # conn.commit()
-        # conn.close()
+        name = self.name_entry.get()
+        surname = self.surname_entry.get()
+        email = self.email_entry.get()
+        password = self.password_entry.get()
+        age = self.age_entry.get()
+        sex = self.sex_var.get()
+        feeling = self.feeling_var.get()
+
+        conn = sqlite3.connect('galvadb.db')
+        try:
+            c = conn.cursor()
+            c.execute("""CREATE TABLE IF NOT EXISTS users (
+                        name TEXT NOT NULL,
+                        surname TEXT NOT NULL,
+                        email TEXT PRIMARY KEY,
+                        password TEXT NOT NULL,
+                        age INTEGER NOT NULL,
+                        sex TEXT NOT NULL,
+                        feeling TEXT NOT NULL
+                    )""") 
+
+            import re
+
+            def is_password_valid(password):
+                # Check minimum length
+                if len(password) < 8:
+                    return False
+                else:
+                    return True
+
+            if not is_password_valid(password):
+                messagebox.showerror("Error", "Password does not meet the required standards (minimum length).")
+                return  # Exit the function if password is invalid
+
+            def is_email_valid(email):
+                # Regular expression pattern for email validation
+                pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
+                # Check if the email matches the pattern
+                if re.match(pattern, email):
+                    return True
+                else:
+                    return False
+
+            if not is_email_valid(email):
+                messagebox.showerror("Error", "Invalid email address.")
+                return  # Exit the function if email is invalid
+
+            c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (name, surname, email, password, age, sex, feeling))
+            conn.commit()
+
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Error", "Email already exists.")
+
+        c.close()         
+        conn.close()
         self.controller.switch_frame(LoginPage)
         self.controller.title("Login")
+        
 
 class LoginPage(tk.Frame):
     def __init__(self, master, controller):
@@ -160,20 +217,20 @@ class LoginPage(tk.Frame):
         # TODO IMPLEMENT AND FIX THIS
         self.controller.switch_frame(ChooseTopicPage)
         self.controller.title("Choose Topic")
-        # email = self.email_entry.get()
-        # password = self.password_entry.get()
-        # conn = sqlite3.connect('user.db')
-        # c = conn.cursor()
-        # c.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
-        # if len(c.fetchall()) > 0:
-        #     conn.close()
-        #     self.controller.switch_frame(ChooseTopicPage)
-        # else:
-        #     conn.close()
-        #     self.email_entry.delete(0, tk.END)
-        #     self.password_entry.delete(0, tk.END)
-        #     self.email_entry.config(bg="red")
-        #     self.password_entry.config(bg="red")
+        email = self.email_entry.get()
+        password = self.password_entry.get()
+        conn = sqlite3.connect('galvadb.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
+        if len(c.fetchall()) > 0:
+             conn.close()
+             self.controller.switch_frame(ChooseTopicPage)
+        else:
+             conn.close()
+             self.email_entry.delete(0, tk.END)
+             self.password_entry.delete(0, tk.END)
+             self.email_entry.config(bg="red")
+             self.password_entry.config(bg="red")
         
 class ChooseTopicPage(tk.Frame):
     def __init__(self, master, controller, slideShowPage=None):
@@ -236,7 +293,9 @@ class SlideshowPage(tk.Frame):
 
         self.canvas = FigureCanvasTkAgg(self.f, self.master)
 
-        self.ani = animation.FuncAnimation(self.f, self.animate, interval=100)
+        #self.ani = animation.FuncAnimation(self.f, self.animate, interval=100)
+        self.ani = animation.FuncAnimation(self.f, self.animate, interval=100, save_count=10)
+
 
     def animate(self, i):
         self.pullData = open('test_data.csv', 'r').read()
