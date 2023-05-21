@@ -122,7 +122,7 @@ class SlideshowPage(tk.Frame):
         self.canvas.get_tk_widget().grid_remove()
         self.controller.switch_frame(DonePage)
         self.controller.title("Results")
-        self.done_button.grid_remove()
+        self.done_button.place_forget()
         self.start_button.grid(row=0,column=1)
         
         self.donePage.set_results(self.streamed_data, self.time_per_image, len(self.images))
