@@ -11,18 +11,21 @@ class LoginPage(tk.Frame):
         
         self.db = DB_util()
 
+        self.grid_columnconfigure((0, 1), weight=1)
+        self.grid_rowconfigure((0, 4), weight=1)
+
         self.email_label = tk.Label(self, text="Email:")
-        self.email_label.grid(row=0, column=0)
+        self.email_label.grid(row=1, column=0, sticky="e")
         self.email_entry = tk.Entry(self)
-        self.email_entry.grid(row=0, column=1)
+        self.email_entry.grid(row=1, column=1, sticky="w")
 
         self.password_label = tk.Label(self, text="Password:")
-        self.password_label.grid(row=1, column=0)
+        self.password_label.grid(row=2, column=0, sticky="e")
         self.password_entry = tk.Entry(self, show="*")
-        self.password_entry.grid(row=1, column=1)
+        self.password_entry.grid(row=2, column=1, sticky="w")
 
         self.login_button = tk.Button(self, text="Login", command=self.login)
-        self.login_button.grid(row=2, column=1)
+        self.login_button.grid(row=3, column=0, columnspan=2)
 
     def login(self):
         # TODO IMPLEMENT AND FIX THIS

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
 from matplotlib import style
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.animation as animation
 
 from PIL import Image, ImageTk
@@ -32,14 +32,17 @@ class SlideshowPage(tk.Frame):
         self.time_per_image = int(self.controller.config["slideshow"]["pic_show_time"])
         self.image_sizes = tuple(self.controller.config["sizes"]["image_sizes"])
         
+        self.msg = tk.Label(self, text="Remember to wear the sensors.")
+        self.msg.place(relx=0.5, rely=0.45, anchor=tk.CENTER)
+
         self.start_button = tk.Button(self, text="Start", command=self.measure_thread)
-        self.start_button.grid(row=0,column=1)
+        self.start_button.place(relx=0.5, rely=0.55, anchor=tk.CENTER)
 
         # set up plot
-        self.f = Figure(figsize=(5,4), dpi=100,)
+        self.f = Figure(figsize=(5,4), dpi=100)
         self.a = self.f.add_subplot(111)
         self.a.xaxis.set_visible(False)
-        self.canvas = FigureCanvasTkAgg(self.f, self.master)
+        self.canvas = FigureCanvasTkAgg(self.f, self)
         self.ani = animation.FuncAnimation(self.f, self.animate, interval=100)
 
     def animate(self, i):
@@ -57,7 +60,8 @@ class SlideshowPage(tk.Frame):
         self.a.plot(self.xar,self.yar)
 
     def measure_thread(self):
-        self.start_button.grid_remove()
+        self.start_button.place_forget()
+        self.msg.place_forget()
         
         if not self.isTest:
             self.ser = serial.Serial('/dev/cu.usbserial-65D2AB33BE')
@@ -72,7 +76,7 @@ class SlideshowPage(tk.Frame):
         self.show_image()
 
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(column=1, row=0)
+        self.canvas.get_tk_widget().place(relx=0.55, rely=0.5, anchor=tk.W)
     
     def show_image(self):
         if self.image_index < len(self.images):
@@ -90,10 +94,9 @@ class SlideshowPage(tk.Frame):
             self.stop_threads = True
             self.t1.join()
             self.image_index = 0
-            
-            self.image_label.grid_forget()
+    
             self.done_button = tk.Button(self, text="Done", command=self.done)
-            self.done_button.place(relx=.5, rely=.65, anchor="c")
+            self.done_button.place(relx=.5, rely=.85, anchor=tk.S)
     
     def measure(self):
         open("test_data.csv","w")
@@ -119,7 +122,8 @@ class SlideshowPage(tk.Frame):
                 break
 
     def done(self):
-        self.canvas.get_tk_widget().grid_remove()
+        self.canvas.get_tk_widget().place_forget()
+        self.image_label.place_forget()
         self.controller.switch_frame(DonePage)
         self.controller.title("Results")
         self.done_button.place_forget()
