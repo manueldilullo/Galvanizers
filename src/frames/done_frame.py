@@ -19,6 +19,9 @@ class DonePage(tk.Frame):
         self.max_val = tk.Label(self, text=" ")
         self.max_val.pack(pady=50)
 
+        self.results = tk.Label(self, text=" ")
+        self.results.pack(pady=50)
+
         self.image_label = tk.Label(self)
         self.image_label.pack(pady=45)
 
@@ -47,10 +50,16 @@ class DonePage(tk.Frame):
         text = f"The image you have reacted the most to is the # {max_average_index} with average gsr value equal to {max_average}"
         self.max_val.config(text=text)
         
+        
         self.images_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "images", self.master.topic)
-        print(self.images_folder)
         img_path =  os.path.join(self.images_folder, f"image{max_average_index}.jpg")
-        print(img_path)
+
+        self.result_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "results", self.master.topic)
+        result_path =  os.path.join(self.result_folder, f"image{max_average_index}.txt")
+
+        with open(result_path) as f:
+            results = f.read()
+        self.results.config(text=results)
         
         image_bin = Image.open(img_path)
         image_bin.thumbnail(tuple(self.controller.config["sizes"]["image_sizes"]), Image.Resampling.LANCZOS)

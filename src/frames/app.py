@@ -11,7 +11,7 @@ import tkinter as tk
 class App(tk.Tk):
     def __init__(self, isTest):
         tk.Tk.__init__(self)
-        
+    
         # Load config file
         self.config = self.load_config_file()
         
