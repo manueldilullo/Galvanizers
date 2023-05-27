@@ -1,6 +1,6 @@
 import sqlite3
 
-def DB_util():
+class DB_util():
     def __init__(self):
         pass
     
@@ -28,9 +28,5 @@ def DB_util():
         #     self.password_entry.delete(0, tk.END)
         #     self.email_entry.config(bg="red")
         #     self.password_entry.config(bg="red")
-        print("Not implemented yet")
-        pass
-
-    def get_email(self):
         print("Not implemented yet")
         pass

@@ -4,7 +4,6 @@ from numpy import mean
 
 from PIL import Image, ImageTk
 
-from utils.db import DB_util
 from utils.smtp import SMTP_util
 
 class DonePage(tk.Frame):
@@ -13,8 +12,7 @@ class DonePage(tk.Frame):
         self.master = master
         self.controller = controller
         
-        self.smtp = SMTP_util() 
-        self.db = DB_util()
+        self.smtp = SMTP_util()
         
         self.max_val = tk.Label(self, text=" ")
         self.max_val.pack(pady=50)
@@ -67,11 +65,12 @@ class DonePage(tk.Frame):
         self.image_label.config(image=self.img)
     
     def send_email(self):
-        # TODO IMPLEMENT THIS
-        # to_address = self.db.get_email()
-        # self.smtp.send_email()
-        print("Not implemented yet")
-        pass
+        to_address = self.controller.user_data['email']
+        sent = self.smtp.send_email(to_address)
+        if sent:
+            tk.messagebox.showinfo("Email sent successfully!", f"You should receive an email shortly at {to_address}")
+        else:
+            tk.messagebox.showerror("Something went wrong", "We couldn't send you an email due to an internal error. We apologize for the inconvenience")
 
     def done(self):
         self.done_button.grid_remove()
