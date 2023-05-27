@@ -47,7 +47,6 @@ class DonePage(tk.Frame):
         text = f"The image you have reacted the most to is the # {max_average_index} with average gsr value equal to {max_average}"
         self.max_val.config(text=text)
         
-        
         self.images_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "images", self.master.topic)
         img_path =  os.path.join(self.images_folder, f"image{max_average_index}.jpg")
 
@@ -66,7 +65,13 @@ class DonePage(tk.Frame):
     
     def send_email(self):
         to_address = self.controller.user_data['email']
-        sent = self.smtp.send_email(to_address)
+        message = f"""
+        Here your results from the Galvanizers team! 
+        
+        {self.max_val.cget("text")}
+        {self.results.cget("text")}
+        """
+        sent = self.smtp.send_email(receiver=to_address, message=message)
         if sent:
             tk.messagebox.showinfo("Email sent successfully!", f"You should receive an email shortly at {to_address}")
         else:
