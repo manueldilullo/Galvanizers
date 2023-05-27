@@ -41,7 +41,6 @@ class DonePage(tk.Frame):
         for limit in range(n_images): 
             lower_limit = int(limit * range_size)
             upper_limit = int((limit + 1) * range_size)
-            print(f"Limitsss {lower_limit}, {upper_limit}")
             averages.append(mean(streamed_data[lower_limit:upper_limit]))
 
         max_average = max(averages)
