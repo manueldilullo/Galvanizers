@@ -63,6 +63,8 @@ class SignupPage(tk.Frame):
 
         self.submit_button = tk.Button(self, text="Submit", command=self.submit)
         self.submit_button.grid(row=8, column=0, columnspan=2)
+        self.login_button = tk.Button(self, text="Already signed up?", command=self.go_to_login)
+        self.login_button.grid(row=9, column=0, columnspan=2)
 
     # utility to submit data to DB and switch to LoginPage
     def submit(self):
@@ -76,5 +78,10 @@ class SignupPage(tk.Frame):
         # feeling = "Happy" if self.feeling_happy.getvar("value") == 1 else "Sad"
         # self.db.signup()
         
+        self.controller.switch_frame(LoginPage)
+        self.controller.title("Login")
+    
+    # Change frame to login frame
+    def go_to_login(self):
         self.controller.switch_frame(LoginPage)
         self.controller.title("Login")
