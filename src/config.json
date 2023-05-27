@@ -10,9 +10,9 @@
 
     },
     "sizes":{
-        "windows_sizes": [500, 500],
+        "windows_sizes": [1366, 768],
         "resizable_sizes": [0, 0],
-        "image_sizes": [250, 250]
+        "image_sizes": [400, 400]
     },
     "slideshow":{
         "pic_show_time": 6000

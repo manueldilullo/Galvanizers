@@ -36,10 +36,10 @@ class SlideshowPage(tk.Frame):
         self.msg.place(relx=0.5, rely=0.45, anchor=tk.CENTER)
 
         self.start_button = tk.Button(self, text="Start", command=self.measure_thread)
-        self.start_button.place(relx=0.5, rely=0.55, anchor=tk.CENTER)
+        self.start_button.place(relx=0.5, rely=0.60, anchor=tk.CENTER)
 
         # set up plot
-        self.f = Figure(figsize=(5,4), dpi=100)
+        self.f = Figure(figsize=(4,4), dpi=100)
         self.a = self.f.add_subplot(111)
         self.a.xaxis.set_visible(False)
         self.canvas = FigureCanvasTkAgg(self.f, self)
@@ -76,7 +76,7 @@ class SlideshowPage(tk.Frame):
         self.show_image()
 
         self.canvas.draw()
-        self.canvas.get_tk_widget().place(relx=0.55, rely=0.5, anchor=tk.W)
+        self.canvas.get_tk_widget().place(relx=0.60, rely=0.5, anchor=tk.W)
     
     def show_image(self):
         if self.image_index < len(self.images):
@@ -87,6 +87,7 @@ class SlideshowPage(tk.Frame):
             
             self.img = ImageTk.PhotoImage(image_bin)
             self.image_label.config(image=self.img)
+            self.image_label.place(relx=0.1, rely=0.5, anchor=tk.W)
             self.image_index += 1
             self.image_label.after(self.time_per_image, self.show_image)
     
@@ -94,8 +95,10 @@ class SlideshowPage(tk.Frame):
             self.stop_threads = True
             self.t1.join()
             self.image_index = 0
-    
+
+            self.font = tk.font.Font(size=24)
             self.done_button = tk.Button(self, text="Done", command=self.done)
+            self.done_button["font"] = self.font
             self.done_button.place(relx=.5, rely=.85, anchor=tk.S)
     
     def measure(self):
