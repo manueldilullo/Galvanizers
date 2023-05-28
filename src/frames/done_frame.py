@@ -65,11 +65,13 @@ class DonePage(tk.Frame):
     
     def send_email(self):
         to_address = self.controller.user_data['email']
-        message = f"""
-        Here your results from the Galvanizers team! 
+        message = f"""Here your results from the Galvanizers team! 
         
-        {self.max_val.cget("text")}
-        {self.results.cget("text")}
+{self.max_val.cget("text")}
+{self.results.cget("text")}
+
+Kindest Regards,
+Galvanizers
         """
         sent = self.smtp.send_email(receiver=to_address, message=message)
         if sent:
