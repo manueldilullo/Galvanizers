@@ -14,6 +14,9 @@ class App(tk.Tk):
     
         # Load config file
         self.config = self.load_config_file()
+
+        # initialize user data
+        self.user_data = {}
         
         # set title
         self.titlevar = self.config["app"]["titlevar"]

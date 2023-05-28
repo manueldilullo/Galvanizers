@@ -30,5 +30,6 @@ class LoginPage(tk.Frame):
     def login(self):
         # TODO IMPLEMENT AND FIX THIS
         # self.db.login()
+        self.controller.user_data["email"] = self.email_entry.get()
         self.controller.switch_frame(ChooseTopicPage)
         self.controller.title("Choose Topic")
