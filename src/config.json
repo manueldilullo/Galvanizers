@@ -9,6 +9,7 @@
     "smtp":{
         "server":"smtp.gmail.com",
         "port": "465",
+        "sender": "Galvanizers team's member <noreply@galvanizers.com>",
         "username": "",
         "password": ""
     },
