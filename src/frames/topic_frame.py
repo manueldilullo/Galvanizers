@@ -32,7 +32,7 @@ class ChooseTopicPage(tk.Frame):
         self.master.topic = self.topic_var.get()
         self.slideShowPage.topic = self.master.topic
         self.slideShowPage.controller.title("Slideshow " + self.slideShowPage.topic)
-
+        self.slideShowPage.msg.place(relx=0.5, rely=0.45, anchor=tk.CENTER)
         self.slideShowPage.images_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "images", self.master.topic)
         print(self.slideShowPage.images_folder)
         self.slideShowPage.images = get_images(self.slideShowPage.images_folder)
