@@ -1,6 +1,10 @@
+from email import utils
 import tkinter as tk
 from .login_frame import LoginPage
+import tkinter.messagebox as messagebox
+import re
 from utils.db import DB_util
+
 
 class SignupPage(tk.Frame):
     def __init__(self, master, controller):
@@ -42,41 +46,121 @@ class SignupPage(tk.Frame):
         self.sex_label = tk.Label(self, text="Gender:")
         self.sex_label.grid(row=6, column=0, sticky="e")
 
+        self.sex_var = tk.StringVar()
+        self.sex_var.set("Male")  # Set initial value
+
         self.sex_frame = tk.Frame(self)
         self.sex_frame.grid(row=6, column=1, sticky="w")
 
-        self.sex_male = tk.Checkbutton(self.sex_frame, text="Male")
-        self.sex_male.grid(row=0, column=1, sticky = "ew")
-        self.sex_female = tk.Checkbutton(self.sex_frame, text="Female")
-        self.sex_female.grid(row=0, column=2, sticky = "ew")
+        self.sex_male = tk.Radiobutton(self.sex_frame, text="Male", variable=self.sex_var, value="Male")
+        self.sex_male.grid(row=0, column=0, sticky="w")
+
+        self.sex_female = tk.Radiobutton(self.sex_frame, text="Female", variable=self.sex_var, value="Female")
+        self.sex_female.grid(row=0, column=1, sticky="w")
+
+        self.sex_other = tk.Radiobutton(self.sex_frame, text="Other", variable=self.sex_var, value="Other")
+        self.sex_other.grid(row=0, column=2, sticky="w")
 
         self.feeling_label = tk.Label(self, text="How are you feeling?")
         self.feeling_label.grid(row=7, column=0, sticky="e")
 
+        self.feeling_var = tk.StringVar()
+        self.feeling_var.set("Neutral")  # Set initial value
+
         self.feeling_frame = tk.Frame(self)
         self.feeling_frame.grid(row=7, column=1, sticky="w")
 
-        self.feeling_happy = tk.Checkbutton(self.feeling_frame, text="Happy😁")
-        self.feeling_happy.grid(row=0, column=1, sticky="ew")
-        self.feeling_sad = tk.Checkbutton(self.feeling_frame, text="Sad😔")
-        self.feeling_sad.grid(row=0, column=2, sticky="ew")
+        self.feeling_anxious = tk.Radiobutton(self.feeling_frame, text="Anxious", variable=self.feeling_var, value="Anxious")
+        self.feeling_anxious.grid(row=0, column=0, sticky="w")
+
+        self.feeling_neutral = tk.Radiobutton(self.feeling_frame, text="Neutral", variable=self.feeling_var, value="Neutral")
+        self.feeling_neutral.grid(row=0, column=1, sticky="w")
 
         self.submit_button = tk.Button(self, text="Submit", command=self.submit)
         self.submit_button.grid(row=8, column=0, columnspan=2)
         self.login_button = tk.Button(self, text="Already signed up?", command=self.go_to_login)
         self.login_button.grid(row=9, column=0, columnspan=2)
 
+       
+
     # utility to submit data to DB and switch to LoginPage
     def submit(self):
-        # TODO FIX AND IMPLEMENT THIS
-        # name = self.name_entry.get()
-        # surname = self.surname_entry.get()
-        # email = self.email_entry.get()
-        # password = self.password_entry.get()
-        # age = self.age_entry.get()
-        # sex = "Male" if self.sex_male.getvar("value") == 1 else "Female"
-        # feeling = "Happy" if self.feeling_happy.getvar("value") == 1 else "Sad"
-        # self.db.signup()
+        fields = {
+            "Name": self.name_entry,
+            "Surname": self.surname_entry,
+            "Email": self.email_entry,
+            "Password": self.password_entry,
+            "Age": self.age_entry,
+            "Sex": self.sex_var,
+            "Feeling": self.feeling_var
+        }
+
+        values = {}
+        for field, widget in fields.items():
+            if isinstance(widget, tk.Variable):
+                values[field] = widget.get()
+            else:
+                values[field] = widget.get()
+
+        name = values["Name"]
+        surname = values["Surname"]
+        email = values["Email"]
+        password = values["Password"]
+        age = values["Age"]
+        sex = values["Sex"]
+        feeling = values["Feeling"]
+
+        #check length of entry
+        for field, entry in fields.items():
+            value = entry.get()
+            if len(value) == 0:
+                messagebox.showerror("Error", f"{field} is required.")
+                return
+        
+        #check minimum length of password
+        def is_password_valid(password):
+            if len(password) < 8:
+                return False
+            else:
+                return True
+
+        if not is_password_valid(password):
+            messagebox.showerror("Error", "Password does not meet the required standards (minimum length).")
+            return # Exit the function if password is invalid
+
+        #check email pattern
+        def is_email_valid(email):
+                pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+
+                if re.match(pattern, email):
+                    return True
+                else:
+                    return False
+
+        if not is_email_valid(email):
+            messagebox.showerror("Error", "Invalid email address.")
+            return 
+        
+
+        #check if age is in normal range
+        def is_valid_age(age):
+    
+                age = int(age)
+                if age >= 1 and age <= 120:
+                    
+                    return True
+                else:
+                    return False
+                
+        if not is_valid_age(age):
+            messagebox.showerror("Error", "Invalid age. Please enter a value between 1 and 120.")
+            return     
+        
+        
+
+
+        db_util = DB_util()
+        db_util.signup(name,surname,email,password,age,sex,feeling)
         
         self.controller.switch_frame(LoginPage)
         self.controller.title("Login")

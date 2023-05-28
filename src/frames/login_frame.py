@@ -1,7 +1,8 @@
 import tkinter as tk
 from .topic_frame import ChooseTopicPage
-
 from utils.db import DB_util
+import tkinter.messagebox as messagebox
+
 
 class LoginPage(tk.Frame):
     def __init__(self, master, controller):
@@ -28,8 +29,35 @@ class LoginPage(tk.Frame):
         self.login_button.grid(row=3, column=0, columnspan=2)
 
     def login(self):
-        # TODO IMPLEMENT AND FIX THIS
-        # self.db.login()
-        self.controller.user_data["email"] = self.email_entry.get()
-        self.controller.switch_frame(ChooseTopicPage)
-        self.controller.title("Choose Topic")
+
+        fields = {
+            "Email": self.email_entry,
+            "Password": self.password_entry
+        }
+
+        values = {}
+        for field, widget in fields.items():
+            if isinstance(widget, tk.Variable):
+                values[field] = widget.get()
+            else:
+                values[field] = widget.get()
+
+        email = values["Email"]
+        password = values["Password"]
+       
+       #check length of entry
+        for field, entry in fields.items():
+            value = entry.get()
+            if len(value) == 0:
+                messagebox.showerror("Error", f"{field} is required.")
+                return
+        
+
+        db_util = DB_util()
+        result = db_util.login(email, password)
+        if len(result) <= 0:
+            messagebox.showerror("Error", "Invalid Credentials.")
+            return
+        else:
+            self.controller.switch_frame(ChooseTopicPage)
+            self.controller.title("Choose Topic")
