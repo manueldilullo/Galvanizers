@@ -9,8 +9,6 @@ class LoginPage(tk.Frame):
         tk.Frame.__init__(self, master)
         self.master = master
         self.controller = controller
-        
-        self.db = DB_util()
 
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 4), weight=1)
@@ -37,10 +35,7 @@ class LoginPage(tk.Frame):
 
         values = {}
         for field, widget in fields.items():
-            if isinstance(widget, tk.Variable):
-                values[field] = widget.get()
-            else:
-                values[field] = widget.get()
+            values[field] = widget.get()
 
         email = values["Email"]
         password = values["Password"]
@@ -51,7 +46,6 @@ class LoginPage(tk.Frame):
             if len(value) == 0:
                 messagebox.showerror("Error", f"{field} is required.")
                 return
-        
 
         db_util = DB_util()
         result = db_util.login(email, password)

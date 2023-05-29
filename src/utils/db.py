@@ -1,10 +1,8 @@
 from pyclbr import Class
 import sqlite3
 import tkinter.messagebox as messagebox
-#from .db import ChooseTopicPage
 import tkinter as tk
 
-#self.db = DB_util()
 class DB_util:
     def __init__(self):
         pass
@@ -28,20 +26,15 @@ class DB_util:
         c.close()         
         conn.close()
 
-
-    
-
-    def login(self,email,password):
-        
-        
+    def login(self, email, password):
         conn = sqlite3.connect('galvadb.db')
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
         result = c.fetchall()
         conn.close()
+
         return result
-        
-       
+         
     def get_email(self):
         print("Not implemented yet")
         pass

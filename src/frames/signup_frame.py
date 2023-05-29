@@ -12,37 +12,41 @@ class SignupPage(tk.Frame):
         
         self.master = master
         self.controller = controller
-
-        self.db = DB_util() 
         
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 9), weight=1)
 
+        # Name
         self.name_label = tk.Label(self, text="Name:")
         self.name_label.grid(row=1, column=0, sticky="e")
         self.name_entry = tk.Entry(self)
         self.name_entry.grid(row=1, column=1, sticky="w")
 
+        # Surname
         self.surname_label = tk.Label(self, text="Surname:")
         self.surname_label.grid(row=2, column=0, sticky="e")
         self.surname_entry = tk.Entry(self)
         self.surname_entry.grid(row=2, column=1, sticky="w")
 
+        # Email
         self.email_label = tk.Label(self, text="Email:")
         self.email_label.grid(row=3, column=0, sticky="e")
         self.email_entry = tk.Entry(self)
         self.email_entry.grid(row=3, column=1, sticky="w")
 
+        # Password
         self.password_label = tk.Label(self, text="Password:")
         self.password_label.grid(row=4, column=0, sticky="e")
         self.password_entry = tk.Entry(self, show="*")
         self.password_entry.grid(row=4, column=1, sticky="w")
 
+        # Age
         self.age_label = tk.Label(self, text="Age:")
         self.age_label.grid(row=5, column=0, sticky="e")
         self.age_entry = tk.Entry(self)
         self.age_entry.grid(row=5, column=1, sticky="w")
 
+        # Sex
         self.sex_label = tk.Label(self, text="Gender:")
         self.sex_label.grid(row=6, column=0, sticky="e")
 
@@ -54,13 +58,12 @@ class SignupPage(tk.Frame):
 
         self.sex_male = tk.Radiobutton(self.sex_frame, text="Male", variable=self.sex_var, value="Male")
         self.sex_male.grid(row=0, column=0, sticky="w")
-
         self.sex_female = tk.Radiobutton(self.sex_frame, text="Female", variable=self.sex_var, value="Female")
         self.sex_female.grid(row=0, column=1, sticky="w")
-
         self.sex_other = tk.Radiobutton(self.sex_frame, text="Other", variable=self.sex_var, value="Other")
         self.sex_other.grid(row=0, column=2, sticky="w")
 
+        # Feeling
         self.feeling_label = tk.Label(self, text="How are you feeling?")
         self.feeling_label.grid(row=7, column=0, sticky="e")
 
@@ -72,16 +75,16 @@ class SignupPage(tk.Frame):
 
         self.feeling_anxious = tk.Radiobutton(self.feeling_frame, text="Anxious", variable=self.feeling_var, value="Anxious")
         self.feeling_anxious.grid(row=0, column=0, sticky="w")
-
         self.feeling_neutral = tk.Radiobutton(self.feeling_frame, text="Neutral", variable=self.feeling_var, value="Neutral")
         self.feeling_neutral.grid(row=0, column=1, sticky="w")
-
+        self.feeling_happy = tk.Radiobutton(self.feeling_frame, text="Happy", variable=self.feeling_var, value="Happy")
+        self.feeling_happy.grid(row=0, column=2, sticky="w")
+        
+        # Submit
         self.submit_button = tk.Button(self, text="Submit", command=self.submit)
         self.submit_button.grid(row=8, column=0, columnspan=2)
         self.login_button = tk.Button(self, text="Already signed up?", command=self.go_to_login)
         self.login_button.grid(row=9, column=0, columnspan=2)
-
-       
 
     # utility to submit data to DB and switch to LoginPage
     def submit(self):
@@ -97,10 +100,7 @@ class SignupPage(tk.Frame):
 
         values = {}
         for field, widget in fields.items():
-            if isinstance(widget, tk.Variable):
-                values[field] = widget.get()
-            else:
-                values[field] = widget.get()
+            values[field] = widget.get()
 
         name = values["Name"]
         surname = values["Surname"]
@@ -119,13 +119,10 @@ class SignupPage(tk.Frame):
         
         #check minimum length of password
         def is_password_valid(password):
-            if len(password) < 8:
-                return False
-            else:
-                return True
+            return len(password) > 8
 
         if not is_password_valid(password):
-            messagebox.showerror("Error", "Password does not meet the required standards (minimum length).")
+            messagebox.showerror("Error", "Password does not meet the required standards (minimum length is 8).")
             return # Exit the function if password is invalid
 
         #check email pattern
@@ -140,25 +137,16 @@ class SignupPage(tk.Frame):
         if not is_email_valid(email):
             messagebox.showerror("Error", "Invalid email address.")
             return 
-        
 
         #check if age is in normal range
         def is_valid_age(age):
-    
                 age = int(age)
-                if age >= 1 and age <= 120:
-                    
-                    return True
-                else:
-                    return False
+                return (age >= 1 and age <= 120)
                 
         if not is_valid_age(age):
             messagebox.showerror("Error", "Invalid age. Please enter a value between 1 and 120.")
             return     
         
-        
-
-
         db_util = DB_util()
         db_util.signup(name,surname,email,password,age,sex,feeling)
         
