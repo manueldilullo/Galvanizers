@@ -5,10 +5,11 @@ import tkinter as tk
 
 class DB_util:
     def __init__(self):
-        pass
+        self._public_var = None
+        self.db_name = "galvadb.db"
 
     def signup(self, name, surname, email, password, age, sex, feeling):
-        conn = sqlite3.connect('galvadb.db')
+        conn = sqlite3.connect(self.db_name)
             
         c = conn.cursor()
         c.execute("""CREATE TABLE IF NOT EXISTS users (
@@ -26,15 +27,32 @@ class DB_util:
         c.close()         
         conn.close()
 
-    def login(self, email, password):
-        conn = sqlite3.connect('galvadb.db')
+    def get_email(self):
+        return self._public_var
+
+    def login(self, email, password):        
+        conn = sqlite3.connect(self.db_name)
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, password))
         result = c.fetchall()
+        self._public_var = email
         conn.close()
 
         return result
-         
-    def get_email(self):
-        print("Not implemented yet")
-        pass
+        
+    def save_data(self, data):
+        conn = sqlite3.connect(self.db_name)
+        c = conn.cursor()
+
+        c.execute('''CREATE TABLE IF NOT EXISTS results (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        email TEXT ,
+                        test TEXT,
+                        image_index INTEGER,
+                        gsr_value REAL, 
+                        FOREIGN KEY (email) REFERENCES users(email)
+            )''')
+
+        c.execute("INSERT INTO results (email, test, image_index, gsr_value) VALUES (?, ?, ?, ?)", data)
+        conn.commit()
+        conn.close()
