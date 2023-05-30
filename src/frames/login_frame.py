@@ -46,13 +46,9 @@ class LoginPage(tk.Frame):
             if len(value) == 0:
                 messagebox.showerror("Error", f"{field} is required.")
                 return
-<<<<<<< HEAD
+            
         result = self.controller.db_util.login(email, password)
-=======
 
-        db_util = DB_util()
-        result = db_util.login(email, password)
->>>>>>> 9c2984791a15e3e156d5715ffafdc67904f6804d
         if len(result) <= 0:
             messagebox.showerror("Error", "Invalid Credentials.")
             return
