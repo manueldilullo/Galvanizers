@@ -5,9 +5,16 @@ from numpy import mean
 from PIL import Image, ImageTk
 
 from utils.smtp import SMTP_util
+from utils.db import DB_util
+
 
 class DonePage(tk.Frame):
     def __init__(self, master, controller):
+        self.test_title = None
+        self.image_index = None
+        self.gsr_value = None
+        self.emailadd = None
+
         tk.Frame.__init__(self, master)
         self.master = master
         self.controller = controller
@@ -46,6 +53,11 @@ class DonePage(tk.Frame):
         
         text = f"The image you have reacted the most to is the # {max_average_index} with average gsr value equal to {max_average}"
         self.max_val.config(text=text)
+
+
+        self.test_title = self.master.topic
+        self.image_index = max_average_index
+        self.gsr_value = max_average
         
         self.images_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "images", self.master.topic)
         img_path =  os.path.join(self.images_folder, f"image{max_average_index}.jpg")
@@ -62,9 +74,12 @@ class DonePage(tk.Frame):
 
         self.img = ImageTk.PhotoImage(image_bin)
         self.image_label.config(image=self.img)
+
+    
     
     def send_email(self):
-        to_address = self.controller.user_data['email']
+        self.emailadd = self.controller.db_util.get_email()
+        to_address = self.emailadd
         message = f"""Here your results from the Galvanizers team! 
         
 {self.max_val.cget("text")}
@@ -80,6 +95,19 @@ Galvanizers
             tk.messagebox.showerror("Something went wrong", "We couldn't send you an email due to an internal error. We apologize for the inconvenience")
 
     def done(self):
+        # To save on the database
+        email = self.emailadd
+        test = self.test_title
+        image_index = self.image_index
+        gsr_value = self.gsr_value
+        
+        data = (email, test, image_index, gsr_value)
+
+        self.controller.db_util.save_data(data)
+
         self.done_button.grid_remove()
         self.controller.switch_frame(self.chooseTopicPage)
         self.controller.title("Choose Topic")
+
+        
+       

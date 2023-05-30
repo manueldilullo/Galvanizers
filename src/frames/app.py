@@ -3,7 +3,7 @@ from .login_frame import LoginPage
 from .topic_frame import ChooseTopicPage
 from .slideshow_frame import SlideshowPage
 from .done_frame import DonePage
-
+from utils.db import DB_util
 import os
 import json
 import tkinter as tk
@@ -33,6 +33,8 @@ class App(tk.Tk):
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
+
+        self.db_util = DB_util()
 
         # Initialize Frames
         self.frames = {}
