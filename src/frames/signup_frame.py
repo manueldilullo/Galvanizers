@@ -86,6 +86,8 @@ class SignupPage(tk.Frame):
         self.login_button = tk.Button(self, text="Already signed up?", command=self.go_to_login)
         self.login_button.grid(row=9, column=0, columnspan=2)
 
+       
+
     # utility to submit data to DB and switch to LoginPage
     def submit(self):
         fields = {
