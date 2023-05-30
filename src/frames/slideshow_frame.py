@@ -32,7 +32,7 @@ class SlideshowPage(tk.Frame):
         self.time_per_image = int(self.controller.config["slideshow"]["pic_show_time"])
         self.image_sizes = tuple(self.controller.config["sizes"]["image_sizes"])
         
-        self.msg = tk.Label(self, text="Remember to wear the sensors."
+        self.msg = tk.Label(self, text="Remember to wear the sensors.")
 
         self.start_button = tk.Button(self, text="Start", command=self.measure_thread)
         self.start_button.place(relx=0.5, rely=0.60, anchor=tk.CENTER)
@@ -101,7 +101,7 @@ class SlideshowPage(tk.Frame):
             self.done_button.place(relx=.5, rely=.85, anchor=tk.S)
     
     def measure(self):
-        open("test_data.csv","w")
+        self.f = open("test_data.csv","w")
 
         self.i = 0
         while True:
@@ -114,13 +114,14 @@ class SlideshowPage(tk.Frame):
     
             self.streamed_data.append(ser_read_float)
 
-            with open("test_data.csv","a+") as f:
-                writer = csv.writer(f,delimiter=",")
+            with open("test_data.csv","a+") as self.f:
+                writer = csv.writer(self.f,delimiter=",")
                 writer.writerow([self.i,ser_read_float])
             
             self.i +=1
 
             if self.stop_threads:
+                self.f.close()
                 break
 
     def done(self):
