@@ -121,6 +121,7 @@ class SlideshowPage(tk.Frame):
             self.i +=1
 
             if self.stop_threads:
+                self.f.truncate(0)
                 self.f.close()
                 break
 
