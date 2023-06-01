@@ -32,7 +32,7 @@ class SlideshowPage(tk.Frame):
         self.time_per_image = int(self.controller.config["slideshow"]["pic_show_time"])
         self.image_sizes = tuple(self.controller.config["sizes"]["image_sizes"])
         
-        self.msg = tk.Label(self, text="Remember to wear the sensors.")
+        self.msg = tk.Label(self, text="You will be shown a sequence of images. Please focus on it. \n Remember to wear the sensors on your fingers. \n When ready, press start. \n")
 
         self.start_button = tk.Button(self, text="Start", command=self.measure_thread)
         self.start_button.place(relx=0.5, rely=0.60, anchor=tk.CENTER)
