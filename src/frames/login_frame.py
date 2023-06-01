@@ -25,6 +25,12 @@ class LoginPage(tk.Frame):
 
         self.login_button = tk.Button(self, text="Login", command=self.login)
         self.login_button.grid(row=3, column=0, columnspan=2)
+        
+        self.signup_button = tk.Button(self, text="Back to Signup", command=self.go_to_signup)
+        self.signup_button.grid(row=4, column=0, columnspan=2)
+
+    def setSignupPage(self, signupPage=None):
+        self.signup_page = signupPage
 
     def login(self):
 
@@ -55,3 +61,7 @@ class LoginPage(tk.Frame):
         else:
             self.controller.switch_frame(ChooseTopicPage)
             self.controller.title("Choose Topic")
+
+    def go_to_signup(self):
+        self.controller.switch_frame(self.signup_page)
+        self.controller.title("Sign up")
