@@ -41,7 +41,7 @@ class App(tk.Tk):
         for F in (SignupPage, LoginPage, DonePage):
             self.frames[F.__name__] = F(master=container, controller=self)
             self.frames[F.__name__].grid(row=0, column=0, sticky="nsew")
-            
+        
         self.frames[SlideshowPage.__name__] = SlideshowPage(master=container, controller=self, donePage=self.frames[DonePage.__name__], isTest=isTest)
         self.frames[SlideshowPage.__name__].grid(row=0, column=0, sticky="nsew")
 
@@ -49,6 +49,8 @@ class App(tk.Tk):
         self.frames[ChooseTopicPage.__name__].grid(row=0, column=0, sticky="nsew")
         
         self.frames[DonePage.__name__].setChooseTopicPage(ChooseTopicPage)
+        
+        self.frames[LoginPage.__name__].setSignupPage(SignupPage)
 
         self.switch_frame(SignupPage)
         self.title("Signup")
