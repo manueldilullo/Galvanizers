@@ -1,12 +1,15 @@
+import os
+import json
+import tkinter as tk
+
 from .signup_frame import SignupPage
 from .login_frame import LoginPage
 from .topic_frame import ChooseTopicPage
 from .slideshow_frame import SlideshowPage
 from .done_frame import DonePage
+from .user_frame import UserPage
+
 from utils.db import DB_util
-import os
-import json
-import tkinter as tk
 
 class App(tk.Tk):
     def __init__(self, isTest):
@@ -14,9 +17,6 @@ class App(tk.Tk):
     
         # Load config file
         self.config = self.load_config_file()
-
-        # initialize user data
-        self.user_data = {}
         
         # set title
         self.titlevar = self.config["app"]["titlevar"]
@@ -38,7 +38,7 @@ class App(tk.Tk):
 
         # Initialize Frames
         self.frames = {}
-        for F in (SignupPage, LoginPage, DonePage):
+        for F in (SignupPage, LoginPage, DonePage, UserPage):
             self.frames[F.__name__] = F(master=container, controller=self)
             self.frames[F.__name__].grid(row=0, column=0, sticky="nsew")
         
@@ -51,6 +51,9 @@ class App(tk.Tk):
         self.frames[DonePage.__name__].setChooseTopicPage(ChooseTopicPage)
         
         self.frames[LoginPage.__name__].setSignupPage(SignupPage)
+        
+        self.frames[UserPage.__name__].setChooseTopicPage(ChooseTopicPage)
+        self.frames[UserPage.__name__].setLoginPage(LoginPage)
 
         self.switch_frame(SignupPage)
         self.title("Signup")

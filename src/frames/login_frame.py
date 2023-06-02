@@ -1,6 +1,5 @@
 import tkinter as tk
 from .topic_frame import ChooseTopicPage
-from utils.db import DB_util
 import tkinter.messagebox as messagebox
 
 
@@ -59,6 +58,7 @@ class LoginPage(tk.Frame):
             messagebox.showerror("Error", "Invalid Credentials.")
             return
         else:
+            self.controller.email = email
             self.controller.switch_frame(ChooseTopicPage)
             self.controller.title("Choose Topic")
 

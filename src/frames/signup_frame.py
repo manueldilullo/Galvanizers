@@ -1,10 +1,8 @@
-from email import utils
-import tkinter as tk
-from .login_frame import LoginPage
-import tkinter.messagebox as messagebox
 import re
-from utils.db import DB_util
+import tkinter as tk
+import tkinter.messagebox as messagebox
 
+from .login_frame import LoginPage
 
 class SignupPage(tk.Frame):
     def __init__(self, master, controller):
@@ -86,8 +84,6 @@ class SignupPage(tk.Frame):
         self.login_button = tk.Button(self, text="Already signed up?", command=self.go_to_login)
         self.login_button.grid(row=9, column=0, columnspan=2)
 
-       
-
     # utility to submit data to DB and switch to LoginPage
     def submit(self):
         fields = {
@@ -149,8 +145,7 @@ class SignupPage(tk.Frame):
             messagebox.showerror("Error", "Invalid age. Please enter a value between 1 and 120.")
             return     
         
-        db_util = DB_util()
-        db_util.signup(name,surname,email,password,age,sex,feeling)
+        self.controller.db_util.signup(name,surname,email,password,age,sex,feeling)
         
         self.controller.switch_frame(LoginPage)
         self.controller.title("Login")
