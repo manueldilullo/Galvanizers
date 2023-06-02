@@ -58,6 +58,7 @@ class UserPage(tk.Frame):
         super().tkraise()
     
     def displayResults(self):
+        self.no_results.config(text=" ")
         # Assume you have a function get_user_data(email) that returns a list of results
         results = self.db.get_user_data(self.controller.email)    
         print(results)    
