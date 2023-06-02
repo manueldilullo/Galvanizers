@@ -101,8 +101,7 @@ class SlideshowPage(tk.Frame):
             self.done_button.place(relx=.5, rely=.85, anchor=tk.S)
     
     def measure(self):
-        self.f = open("test_data.csv","w")
-
+        
         self.i = 0
         while True:
             if not self.isTest:
@@ -115,13 +114,14 @@ class SlideshowPage(tk.Frame):
             self.streamed_data.append(ser_read_float)
 
             with open("test_data.csv","a+") as self.f:
+                if self.i==0 :
+                    self.f.truncate(0)
                 writer = csv.writer(self.f,delimiter=",")
                 writer.writerow([self.i,ser_read_float])
             
             self.i +=1
 
             if self.stop_threads:
-                self.f.close()
                 break
 
     def done(self):
