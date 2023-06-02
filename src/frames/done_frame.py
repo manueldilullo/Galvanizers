@@ -31,19 +31,19 @@ class DonePage(tk.Frame):
         self.smtp = SMTP_util()
         
         self.max_val = tk.Label(self, text=" ")
-        self.max_val.pack(pady=50)
+        self.max_val.pack(pady=20)
 
         self.results = tk.Label(self, text=" ")
-        self.results.pack(pady=50)
+        self.results.pack(pady=10)
 
         self.image_label = tk.Label(self)
-        self.image_label.pack(pady=45)
+        self.image_label.pack(pady=20)
 
         self.email_button = tk.Button(self, text="Send me an email", command=self.send_email)
         self.email_button.pack(pady=10)
         
         self.done_button = tk.Button(self, text="Done", command=self.done)
-        self.done_button.pack(pady=10)
+        self.done_button.pack()
     
     def setChooseTopicPage(self, chooseTopicPage=None):
         self.chooseTopicPage = chooseTopicPage

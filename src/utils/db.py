@@ -22,8 +22,21 @@ class DB_util:
                             feeling TEXT NOT NULL
                         )""")
 
-        c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (name, surname, email, password, age, sex, feeling))
-        conn.commit()
+        c.execute("""SELECT email
+                   FROM users
+                   WHERE email=?
+                       """,
+                (email,))
+        result = c.fetchone()
+
+        if result:
+            # Record already exists
+            messagebox.showerror("Error","Email already registered")
+
+        else:
+            c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (name, surname, email, password, age, sex, feeling))
+            conn.commit()
+        
         c.close()         
         conn.close()
 
@@ -86,3 +99,4 @@ class DB_util:
         conn.close()
         
         return results
+    

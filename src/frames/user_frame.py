@@ -74,7 +74,7 @@ class UserPage(tk.Frame):
         for result in results:
             result_text_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "results", result[3], f"image{result[4]}.txt")
             with open(result_text_path) as f:
-                text_to_show = f"[{result[6]}] {f.read()}"
+                text_to_show = f"[{result[6]}] GSR Value: {result[5]}. Summary text: {f.read()}"
                 
             self.listbox.insert("end", text_to_show.replace("\n"," "))
     
