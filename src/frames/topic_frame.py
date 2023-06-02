@@ -1,6 +1,9 @@
 import os
 import tkinter as tk
+from PIL import ImageTk, Image
+
 from .slideshow_frame import SlideshowPage
+from .user_frame import UserPage
 
 def get_images(folder_name):
     return [os.path.join(folder_name, f) for f in os.listdir(folder_name) if os.path.isfile(os.path.join(folder_name, f))]
@@ -12,7 +15,15 @@ class ChooseTopicPage(tk.Frame):
         self.master = master
         self.controller = controller
         self.slideShowPage = slideShowPage
-        
+
+        # Load the icon image
+        icon_image = Image.open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets", "user.png"))
+        self.tk_icon = ImageTk.PhotoImage(icon_image)
+
+        # Create the user icon button
+        self.user_icon_btn = tk.Button(self, image=self.tk_icon, command=self.go_to_user_page)
+        self.user_icon_btn.grid(row=0, column=0, sticky="nw", padx=2, pady=2)
+
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0, 3), weight=1)
         
@@ -43,3 +54,6 @@ class ChooseTopicPage(tk.Frame):
         self.slideShowPage.start_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         self.controller.switch_frame(SlideshowPage)
+        
+    def go_to_user_page(self):
+        self.controller.switch_frame(UserPage)

@@ -1,8 +1,8 @@
-from pyclbr import Class
 import sqlite3
-import tkinter.messagebox as messagebox
-import tkinter as tk
+from datetime import datetime
 
+import tkinter as tk
+import tkinter.messagebox as messagebox
 class DB_util:
     def __init__(self):
         self._public_var = None
@@ -22,8 +22,21 @@ class DB_util:
                             feeling TEXT NOT NULL
                         )""")
 
-        c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (name, surname, email, password, age, sex, feeling))
-        conn.commit()
+        c.execute("""SELECT email
+                   FROM users
+                   WHERE email=?
+                       """,
+                (email,))
+        result = c.fetchone()
+
+        if result:
+            # Record already exists
+            messagebox.showerror("Error","Email already registered")
+
+        else:
+            c.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)", (name, surname, email, password, age, sex, feeling))
+            conn.commit()
+        
         c.close()         
         conn.close()
 
@@ -39,8 +52,8 @@ class DB_util:
         conn.close()
 
         return result
-        
-    def save_data(self, data):
+    
+    def create_result_table(self):
         conn = sqlite3.connect(self.db_name)
         c = conn.cursor()
 
@@ -48,11 +61,42 @@ class DB_util:
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         email TEXT ,
                         test TEXT,
+                        topic TEXT,
                         image_index INTEGER,
                         gsr_value REAL, 
+                        timestamp TEXT,
                         FOREIGN KEY (email) REFERENCES users(email)
             )''')
-
-        c.execute("INSERT INTO results (email, test, image_index, gsr_value) VALUES (?, ?, ?, ?)", data)
         conn.commit()
         conn.close()
+        
+    def save_data(self, data):
+        self.create_result_table()
+        
+        # Get the current UTC time
+        current_time = datetime.now()
+
+        # Format the time as a string in GMT format
+        time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        print(time_str)
+        
+        conn = sqlite3.connect(self.db_name)
+        c = conn.cursor()
+        
+        c.execute("INSERT INTO results (email, test, topic, image_index, gsr_value, timestamp) VALUES (?, ?, ?, ?, ?, ?)", data + (time_str, ))
+        conn.commit()
+        conn.close()
+        
+    def get_user_data(self, email):
+        self.create_result_table()
+        
+        conn = sqlite3.connect(self.db_name)
+        c = conn.cursor()
+
+        conn.row_factory = lambda cursor, row: row[0]
+        results = c.execute("SELECT id, email, test, topic, image_index, gsr_value, timestamp FROM results WHERE email=?", (email,)).fetchall()
+        conn.commit()
+        conn.close()
+        
+        return results
+    
