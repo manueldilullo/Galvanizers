@@ -17,6 +17,9 @@ Installation
 5. After the user has viewed all of the images, the program will show the result of galvanic skin measurements.
 6. A user, before returning to the home page, can send the results to he's email
 
+# Video example
+<img src="assets/GSRTracker_ScreenRecording.gif" width="1366" height="720" />
+
 # License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
